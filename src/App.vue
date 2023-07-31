@@ -15,7 +15,8 @@ export default {
 
     try {
       todos = JSON.parse(jsonData);
-    }catch (err) {}
+    } catch (err) {
+    }
 
     return {
       todos,
@@ -27,7 +28,24 @@ export default {
   computed: {
     activeTodos() {
       return this.todos.filter(todo => !todo.completed);
-    }
+    },
+
+    completedTodos() {
+      return this.todos.filter(todo => todo.completed);
+    },
+
+    visibleTodos() {
+      switch (this.status) {
+        case "active":
+          return this.activeTodos
+
+        case "completed":
+          return this.completedTodos
+
+        default:
+          return this.todos;
+      }
+    },
   },
 
   methods: {
@@ -75,15 +93,19 @@ export default {
         </form>
       </header>
 
-      <section class="todoapp__main">
+      <TransitionGroup
+        name="list"
+        tag="section"
+        class="todoapp__main"
+      >
         <TodoItem
-          v-for="todo, index of todos"
+          v-for="todo, index of visibleTodos"
           :key="todo.id"
           :todo="todo"
-          @update="todos[index] = $event"
-          @remove="todos.splice(index, 1)"
+          @update="Object.assign(todo, $event)"
+          @remove="todos.splice(todos.indexOf(todo), 1)"
         />
-      </section>
+      </TransitionGroup>
 
       <footer class="todoapp__footer">
         <span class="todo-count">
@@ -115,3 +137,20 @@ export default {
     </article>
   </div>
 </template>
+
+<style scoped>
+.list-enter-active,
+.list-leave-active {
+  max-height: 60px;
+  transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: scaleY(0);
+
+}
+
+</style>
