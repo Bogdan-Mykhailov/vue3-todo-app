@@ -59,7 +59,7 @@ export default {
     handleSubmitForm() {
       createTodos(this.title)
         .then(({data}) => {
-          this.todos.push(data);
+          this.todos = [...this.todos, data];
           this.title = '';
         })
     },
