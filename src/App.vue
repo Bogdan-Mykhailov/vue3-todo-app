@@ -83,7 +83,18 @@ export default {
         .then(() => {
           this.todos = this.todos.filter(({id}) => id !== todoId);
         });
-    }
+    },
+
+    removeAllCompleted() {
+      const completedTodoIds = this.todos
+        .filter(({completed}) => completed)
+        .map(({id}) => id);
+
+      Promise.all(completedTodoIds.map(removeTodo))
+        .then(() => {
+          this.todos = this.todos.filter(({id}) => !completedTodoIds.includes(id));
+        });
+    },
   },
 }
 </script>
@@ -94,7 +105,8 @@ export default {
 
     <div class="todoapp__content">
       <header class="todoapp__header">
-        <button class="todoapp__toggle-all"
+        <button v-if="todos.length > 0"
+                class="todoapp__toggle-all"
                 :class="{active: activeTodos.length === 0}"
         ></button>
 
@@ -122,7 +134,10 @@ export default {
         />
       </TransitionGroup>
 
-      <footer class="todoapp__footer">
+      <footer
+        v-if="todos.length > 0"
+        class="todoapp__footer"
+      >
         <span class="todo-count">
           {{ activeTodos.length }} items left
         </span>
@@ -133,7 +148,8 @@ export default {
 
         <button
           class="todoapp__clear-completed"
-          v-if="activeTodos.length > 0"
+          v-if="completedTodos.length > 0"
+          @click="removeAllCompleted"
         >
           Clear completed
         </button>
