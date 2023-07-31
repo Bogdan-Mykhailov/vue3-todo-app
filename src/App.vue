@@ -1,7 +1,7 @@
 <script>
-import todos from './data/todos';
 import StatusFilter from "@/components/StatusFilter.vue";
 import TodoItem from "@/components/TodoItem.vue";
+import {createTodos, getTodos, removeTodo, updateTodo} from "@/dal/apiTodos";
 
 export default {
   components: {
@@ -19,7 +19,7 @@ export default {
     }
 
     return {
-      todos,
+      todos: [],
       title: '',
       status: 'all',
     }
@@ -48,28 +48,38 @@ export default {
     },
   },
 
-  methods: {
-    handleSubmitForm() {
-      const newTodo = {
-        id: Date.now(),
-        title: this.title,
-        completed: false,
-      };
-
-      this.todos.push(newTodo);
-
-      this.title = '';
-    }
+  mounted() {
+    getTodos()
+      .then(({data}) => {
+        this.todos = data
+      })
   },
 
-  watch: {
-    todos: {
-      deep: true,
-      handler() {
-        localStorage.setItem('todos', JSON.stringify(this.todos));
-      }
+  methods: {
+    handleSubmitForm() {
+      createTodos(this.title)
+        .then(({data}) => {
+          this.todos.push(data);
+          this.title = '';
+        })
+    },
+
+    updateTodo({ id, title, completed }) {
+      updateTodo({ id, title, completed })
+        .then(({data}) => {
+          this.todos = this.todos.map(
+            todo => todo.id !== id ? todo : data
+          )
+        })
+    },
+
+    removeTodo(todoId) {
+      removeTodo(todoId)
+        .then(() => {
+					this.todos =this.todos.filter(({id}) => id !== todoId);
+        });
     }
-  }
+  },
 }
 </script>
 
@@ -102,8 +112,8 @@ export default {
           v-for="todo, index of visibleTodos"
           :key="todo.id"
           :todo="todo"
-          @update="Object.assign(todo, $event)"
-          @remove="todos.splice(todos.indexOf(todo), 1)"
+          @update="updateTodo"
+          @remove="removeTodo(todo.id)"
         />
       </TransitionGroup>
 
@@ -150,7 +160,5 @@ export default {
   opacity: 0;
   max-height: 0;
   transform: scaleY(0);
-
 }
-
 </style>
