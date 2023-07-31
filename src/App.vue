@@ -61,6 +61,16 @@ export default {
   },
 
   methods: {
+    toggleAllCompleted() {
+    	const allCompleted = this.activeTodos.length === 0;
+      this.todos.forEach(todo => (todo.completed = !allCompleted))
+
+
+      this.todos.forEach(({ id, title, completed }) => {
+        updateTodo({ id, title, completed });
+      });
+    },
+
     handleSubmitForm() {
       createTodos(this.title)
         .then(({data}) => {
@@ -105,9 +115,11 @@ export default {
 
     <div class="todoapp__content">
       <header class="todoapp__header">
-        <button v-if="todos.length > 0"
-                class="todoapp__toggle-all"
-                :class="{active: activeTodos.length === 0}"
+        <button
+          v-if="todos.length > 0"
+          class="todoapp__toggle-all"
+          :class="{active: activeTodos.length === 0}"
+          @click="toggleAllCompleted"
         ></button>
 
         <form @submit.prevent="handleSubmitForm">
