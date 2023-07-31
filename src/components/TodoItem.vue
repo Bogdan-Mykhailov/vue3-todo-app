@@ -1,23 +1,25 @@
 <script>
 export default {
-  name: 'TodoItem',
   props: {
     todo: Object,
   },
-  emits: ['update', 'delete'],
+  emits: ['update', 'remove'],
+
   data() {
     return {
-      editing: false,
+    	editing: false,
       newTitle: this.todo.title,
     };
   },
+
   methods: {
     toggle() {
       this.$emit('update', {
         ...this.todo,
         completed: !this.todo.completed,
-      });
+      })
     },
+
     rename() {
       if (!this.editing) {
         return;
@@ -30,7 +32,7 @@ export default {
       }
 
       if (this.newTitle === '') {
-        this.remove();
+        this.removeTodo();
 
         return;
       }
@@ -39,61 +41,31 @@ export default {
         ...this.todo,
         title: this.newTitle,
       });
+
+      this.newTitle = '';
     },
-    remove() {
-      this.$emit('delete');
+
+    removeTodo() {
+      this.$emit('remove')
     },
+
     edit() {
       this.newTitle = this.todo.title;
       this.editing = true;
 
       this.$nextTick(() => {
-        this.$refs['title-field'].focus();
+      	this.$refs['title-field'].focus();
       });
     }
-  },
-};
+  }
+}
 </script>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <template>
-  <div class="todo" :class="{ completed: todo.completed }">
+  <div
+    class="todo"
+    :class="{ completed: todo.completed }"
+  >
     <label class="todo__status-label">
       <input
         type="checkbox"
@@ -116,16 +88,13 @@ export default {
     </form>
 
     <template v-else>
-      <span class="todo__title" @dblclick="edit">
+      <span
+        class="todo__title"
+        @dblclick="edit"
+      >
         {{ todo.title }}
       </span>
-
-      <button
-        class="todo__remove"
-        @click="remove"
-      >
-        x
-      </button>
+      <button class="todo__remove" @click="removeTodo">x</button>
     </template>
 
     <div class="modal overlay" :class="{ 'is-active': false }">
@@ -134,7 +103,3 @@ export default {
     </div>
   </div>
 </template>
-
-<style>
-
-</style>
