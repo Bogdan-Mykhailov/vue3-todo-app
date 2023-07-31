@@ -2,11 +2,13 @@
 import StatusFilter from "@/components/StatusFilter.vue";
 import TodoItem from "@/components/TodoItem.vue";
 import {createTodos, getTodos, removeTodo, updateTodo} from "@/dal/apiTodos";
+import Message from "@/components/Message.vue";
 
 export default {
   components: {
     StatusFilter,
     TodoItem,
+    Message,
   },
 
   data() {
@@ -22,6 +24,7 @@ export default {
       todos: [],
       title: '',
       status: 'all',
+      errorMessage: '',
     }
   },
 
@@ -52,7 +55,9 @@ export default {
     getTodos()
       .then(({data}) => {
         this.todos = data
-      })
+      }).catch(() => {
+      this.$refs.errorMessage.show('Unable to load todos.');
+    })
   },
 
   methods: {
@@ -64,8 +69,8 @@ export default {
         })
     },
 
-    updateTodo({ id, title, completed }) {
-      updateTodo({ id, title, completed })
+    updateTodo({id, title, completed}) {
+      updateTodo({id, title, completed})
         .then(({data}) => {
           this.todos = this.todos.map(
             todo => todo.id !== id ? todo : data
@@ -76,7 +81,7 @@ export default {
     removeTodo(todoId) {
       removeTodo(todoId)
         .then(() => {
-					this.todos =this.todos.filter(({id}) => id !== todoId);
+          this.todos = this.todos.filter(({id}) => id !== todoId);
         });
     }
   },
@@ -135,16 +140,20 @@ export default {
       </footer>
     </div>
 
-    <article class="message is-danger message--hidden">
-      <div class="message-header">
-        <p>Error</p>
-        <button class="delete"></button>
-      </div>
+    <Message
+      class="is-warning"
+      ref="errorMessage"
+    >
+      <template #default="{ text }">
+        <p>{{ text }}</p>
+        <button class="delete" @click="$refs.errorMessage.hide()">X</button>
+      </template>
 
-      <div class="message-body">
-        Unable to add a Todo
-      </div>
-    </article>
+      <template #header>
+        <p>Server Error</p>
+      </template>
+    </Message>
+
   </div>
 </template>
 
